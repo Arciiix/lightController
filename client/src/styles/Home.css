@@ -1,0 +1,53 @@
+body {
+  background-color: #111413;
+}
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 98vw;
+  height: 98vh;
+}
+.currChart {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.navbar {
+  position: fixed;
+  bottom: 5px;
+}
+
+@media screen and (min-width: 2001px) {
+  .currChart {
+    width: 20%;
+    font-size: 70px;
+  }
+}
+@media screen and (max-width: 2000px) {
+  .currChart {
+    width: 40%;
+    font-size: 70px;
+  }
+}
+
+@media screen and (max-width: 1200px) {
+  .currChart {
+    width: 50%;
+    font-size: 80px;
+  }
+}
+@media screen and (max-width: 768px) {
+  .currChart {
+    width: 85%;
+    font-size: 60px;
+  }
+}
+@media screen and (max-width: 576px) {
+  .currChart {
+    width: 85%;
+    font-size: 50px;
+  }
+}
