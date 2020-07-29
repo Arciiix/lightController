@@ -1,0 +1,25 @@
+.settingsContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 98vw;
+  height: 98vh;
+  flex-direction: column;
+}
+.fields {
+  background-color: white;
+  padding: 2vh 7vw;
+  width: auto;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.field {
+  width: auto;
+}
+.fieldDiv {
+  margin-bottom: 20px;
+}

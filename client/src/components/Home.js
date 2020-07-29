@@ -11,6 +11,7 @@ import "../styles/Home.css";
 import "../styles/Chart.css";
 
 import HistoryChart from "./HistoryChart";
+import Settings from "./Settings";
 
 class Home extends React.Component {
   constructor(props) {
@@ -200,6 +201,14 @@ class Home extends React.Component {
               </BottomNavigation>
             </div>
           </div>
+        );
+        break;
+      case "Settings":
+        return (
+          <Settings
+            onNavigationStateChange={this.navigationChange}
+            that={this}
+          />
         );
         break;
     }
