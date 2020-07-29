@@ -1,0 +1,79 @@
+.historyChart {
+  width: 80vw;
+}
+.nextChange {
+  margin: 10px;
+  text-align: center;
+}
+.nextChangeSpan {
+  font-size: 40px;
+  color: white;
+  text-align: center;
+}
+.lastChangeSpan {
+  color: rgba(255, 255, 255, 0.63);
+  text-align: center;
+  font-size: 25px;
+}
+@media screen and (min-width: 2001px) {
+  .nextChangeSpan {
+    font-size: 40px;
+  }
+  .lastChangeSpan {
+    font-size: 25px;
+  }
+}
+@media screen and (max-width: 2000px) {
+  .nextChangeSpan {
+    font-size: 40px;
+  }
+  .lastChangeSpan {
+    font-size: 25px;
+  }
+}
+
+@media screen and (max-width: 1200px) {
+  .nextChange {
+    margin: 0;
+  }
+  .nextChangeSpan {
+    font-size: 50px;
+  }
+  .lastChangeSpan {
+    font-size: 35px;
+  }
+}
+@media screen and (max-width: 768px) {
+  .nextChangeSpan {
+    font-size: 50px;
+  }
+  .lastChangeSpan {
+    font-size: 35px;
+  }
+}
+@media screen and (max-width: 576px) {
+  .nextChange {
+    margin: 0;
+  }
+  .nextChangeSpan {
+    font-size: 40px;
+  }
+  .lastChangeSpan {
+    font-size: 25px;
+  }
+}
+
+@media screen and (max-height: 550px) {
+  .nextChange {
+    margin: 0;
+  }
+  .switch {
+    flex-direction: row;
+  }
+  .nextChangeSpan {
+    font-size: 6vh;
+  }
+  .lastChangeSpan {
+    font-size: 5vh;
+  }
+}
