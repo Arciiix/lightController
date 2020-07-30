@@ -28,8 +28,7 @@ class Settings extends React.Component {
     };
   }
   componentDidMount() {
-    //DEV
-    //Fetch the current settings and replace the values in state with them
+    this.setState(this.props.currentSettings);
   }
   handleInputChange(fieldName, e) {
     let value = e.target.value;

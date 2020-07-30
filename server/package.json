@@ -1,0 +1,17 @@
+{
+  "name": "lightcontroller",
+  "version": "1.0.0",
+  "description": "A simple app which control the light (sonoff) and displays the current and historical temperature. Great for aquarium",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Arciiix",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "node-fetch": "^2.6.0",
+    "sqlite3": "^5.0.0"
+  }
+}

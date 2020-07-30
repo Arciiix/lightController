@@ -17,38 +17,51 @@ import "../styles/Chart.css";
 import HistoryChart from "./HistoryChart";
 import Settings from "./Settings";
 
+//DEV
+const serverIp = "http://localhost:5252";
+
 class Home extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       isLoaded: false,
       isOn: false,
-      currentTemperature: 25, //DEV
-      historyTemperatures: [
-        { time: "12:35", value: 23 },
-        { time: "12:40", value: 25 },
-        { time: "12:45", value: 25 },
-        { time: "12:50", value: 21 },
-        { time: "12:55", value: 23.5 },
-      ], //DEV
+      currentTemperature: 0,
+      historyTemperatures: [],
       currentPage: "Home",
-      nextChangeText: "Wyłączenie o 22:00", //DEV
-      lastChangeText: "Jeszcze nie przełączono!", //DEV
+      nextChangeText: "",
+      lastChangeText: "Jeszcze nie przełączono!",
+      settings: {
+        onTime: "",
+        offTime: "",
+        ip: "",
+      },
     };
   }
 
   async componentDidMount() {
-    //DEV
-    this.setState({ isLoaded: true });
+    let request = await fetch(`${serverIp}/getData`);
+
+    if (request.status === 200) {
+      let dataObj = await request.json();
+
+      //isOn is stored by string, so I parse it into the boolean
+      if (dataObj.isOn === "true") {
+        dataObj.isOn = true;
+      } else {
+        dataObj.isOn = false;
+      }
+      this.setState({ isLoaded: true, ...dataObj }, this.forceUpdate);
+    }
   }
 
   navigationChange(event, newValue) {
     this.setState({ currentPage: newValue });
   }
 
-  toogleLight(e) {
-    //DEV
+  async toogleLight(e) {
     this.setState({ isOn: e });
+    let request = await fetch(`${serverIp}/toogleLight?on=${e}`);
   }
   render() {
     if (this.state.isLoaded) {
@@ -219,6 +232,7 @@ class Home extends React.Component {
             <Settings
               onNavigationStateChange={this.navigationChange}
               that={this}
+              currentSettings={this.state.settings}
             />
           );
           break;
