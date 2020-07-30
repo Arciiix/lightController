@@ -9,6 +9,18 @@ body {
   width: 98vw;
   height: 98vh;
 }
+.spinner {
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.spinner span {
+  position: absolute;
+  bottom: 50px;
+  font-size: 50px;
+}
 .currChart {
   margin-top: -100px;
   display: flex;
