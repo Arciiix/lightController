@@ -13,6 +13,9 @@ import {
   AiOutlineSetting,
 } from "react-icons/ai";
 
+//DEV
+const serverIp = "http://localhost:5252";
+
 class Settings extends React.Component {
   constructor(props) {
     super(props);
@@ -37,9 +40,12 @@ class Settings extends React.Component {
     this.setState(state);
   }
 
-  updateSettings() {
+  async updateSettings() {
     if (!this.validate(this.state)) return;
-    //DEV
+    let request = await fetch(
+      `${serverIp}/updateSettings?onTime=${this.state.onTime}&offTime=${this.state.offTime}&ip=${this.state.ip}`
+    );
+    console.log(request.status);
     this.setState({ onTime: "", offTime: "", ip: "" });
   }
 
