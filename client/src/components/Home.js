@@ -62,7 +62,37 @@ class Home extends React.Component {
   async toogleLight(e) {
     this.setState({ isOn: e });
     let request = await fetch(`${serverIp}/toogleLight?on=${e}`);
+
+    //Get the current time in HH:MM:SS format
+    let time = new Date()
+      .toTimeString()
+      .replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");
+    //Remove seconds from the value
+    time = time.substring(0, time.length - 3);
+    //Set the time to the state (after the request, this is why this setState for switch is earlier)
+    this.setState({ lastChangeText: `Ostatnie przełączenie: ${time}` });
   }
+
+  parseToPercent(value) {
+    //I give the value by percent of 10
+    //For e.g. 50% means 50% of 10 = 5
+    //The minimal value is 20, and the maximal - 30, and this is why that's the percent of 10 (30 - 20)
+    //So I do 20 + 50% of 10 = 25
+    //It means that the current temperature is 25
+
+    //I subtract 20 from the value (look above) and then calculate, how many percent of 10 (30 - 20) is that value
+    value -= 20;
+    value /= 10;
+    return value * 100;
+  }
+
+  parsePercentToFloat(value) {
+    //I do opposite of earlier calculations
+    value /= 10;
+    value += 20;
+    return value;
+  }
+
   render() {
     if (this.state.isLoaded) {
       switch (this.state.currentPage) {
@@ -88,8 +118,15 @@ class Home extends React.Component {
                           show: false,
                         },
                         value: {
-                          formatter: function (val) {
-                            return parseFloat(val) + "°C";
+                          formatter: (val) => {
+                            //I get the value by percent of 10
+                            //For e.g. 50% means 50% of 10 = 5
+                            //The minimal value is 20, and the maximal - 30, and this is why that's the percent of 10 (30 - 20)
+                            //So I do 20 + 50% of 10 = 25
+                            //It means that the current temperature is 25
+                            let value =
+                              parseFloat(this.parsePercentToFloat(val)) + "°C";
+                            return value;
                           },
                           color: "#fff",
                           fontSize: "1em",
@@ -121,7 +158,12 @@ class Home extends React.Component {
                     },
                   },
                 }}
-                series={[this.state.currentTemperature]}
+                //I give the value by percent of 10
+                //For e.g. 50% means 50% of 10 = 5
+                //The minimal value is 20, and the maximal - 30, and this is why that's the percent of 10 (30 - 20)
+                //So I do 20 + 50% of 10 = 25
+                //It means that the current temperature is 25
+                series={[this.parseToPercent(this.state.currentTemperature)]}
                 type="radialBar"
                 width={"100%"}
               />

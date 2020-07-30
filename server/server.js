@@ -26,7 +26,7 @@ app.get("/temperature", (req, res) => {
 
 app.get("/getData", (req, res) => {
   //DEV
-  currentTemperature = 22.2;
+  currentTemperature = 25.2;
   let historyTemperatures = [
     { time: "12:35", value: 23 },
     { time: "12:40", value: 25 },
