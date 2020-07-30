@@ -23,6 +23,8 @@ const fs = require("fs");
 const { isBuffer } = require("util");
 
 const PORT = 5252;
+
+//Default settings, the real settings are fetched from the JSON file
 let options = {
   onTime: "8:00",
   offTime: "22:00",
@@ -63,7 +65,6 @@ app.get("/getData", async (req, res) => {
 
 app.get("/updateSettings", (req, res) => {
   updateSettings(req.query);
-  getSettings();
 });
 
 app.get("/toogleLight", async (req, res) => {
@@ -187,6 +188,8 @@ function getSettings() {
 
 function updateSettings(newSettings) {
   let newOptions = JSON.stringify({ ...options, ...newSettings });
+  if (options === JSON.parse(newOptions)) return;
+  options = JSON.parse(newOptions);
   fs.writeFile("./settings.json", newOptions, (err) => {
     if (err) {
       console.log(
@@ -208,4 +211,5 @@ const server = app.listen(PORT, () => {
   console.log(`[${parseDate(new Date())}] App has started on port ${PORT}`);
 });
 
+//Fetch the settings from the file
 getSettings();
