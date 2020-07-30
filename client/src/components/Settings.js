@@ -20,10 +20,16 @@ class Settings extends React.Component {
       onTime: "",
       offTime: "",
       ip: "",
-      defaultOnTime: "8:00", //DEV - should fetch the current value
-      defaultOffTime: "22:00", //DEV - should fetch the current value
-      defaultIp: "192.168.0.110", //DEV - should fetch the current value
+      errors: {
+        onTime: false,
+        offTime: false,
+        ip: false,
+      },
     };
+  }
+  componentDidMount() {
+    //DEV
+    //Fetch the current settings and replace the values in state with them
   }
   handleInputChange(fieldName, e) {
     let value = e.target.value;
@@ -31,6 +37,41 @@ class Settings extends React.Component {
     state[fieldName] = value;
     this.setState(state);
   }
+
+  updateSettings() {
+    if (!this.validate(this.state)) return;
+    //DEV
+    this.setState({ onTime: "", offTime: "", ip: "" });
+  }
+
+  validate({ onTime, offTime, ip }) {
+    //Destructure the state and get the values of onTime, offTime and ip input
+    let errors = this.state.errors;
+
+    //Regular expression for validation
+    let regExpTime = /^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/;
+    let regExpIp = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/;
+
+    //Replace the error object with the new one (while validating)
+    errors = this.matchTheRegExp(onTime, regExpTime, "onTime", errors);
+    errors = this.matchTheRegExp(offTime, regExpTime, "offTime", errors);
+    errors = this.matchTheRegExp(ip, regExpIp, "ip", errors);
+
+    //Update the error object globally, and if there's an error, return false, otherwise - return true
+    this.setState({ errors: errors });
+
+    let isValid = true;
+    for (let item in errors) {
+      if (errors[item]) isValid = false;
+    }
+    return isValid;
+  }
+
+  matchTheRegExp(value, regExp, fieldName, errorObject) {
+    errorObject[fieldName] = !regExp.test(value) ? true : false;
+    return errorObject;
+  }
+
   render() {
     return (
       <div className="settingsContainer">
@@ -41,30 +82,41 @@ class Settings extends React.Component {
               label="Godzina włączania"
               className={"field"}
               onChange={this.handleInputChange.bind(this)}
-              placeholder={this.state.defaultOnTime}
+              placeholder={"8:00"}
               value={this.state.onTime}
               onChange={this.handleInputChange.bind(this, "onTime")}
+              error={this.state.errors.onTime}
+              required
             />
           </div>
           <div className="fieldDiv">
             <TextField
               label="Godzina wyłączania"
               className={"field"}
-              placeholder={this.state.defaultOffTime}
+              placeholder={"22:00"}
               value={this.state.offTime}
               onChange={this.handleInputChange.bind(this, "offTime")}
+              error={this.state.errors.offTime}
+              required
             />
           </div>
           <div className="fieldDiv">
             <TextField
               label="IP"
               className={"field"}
-              placeholder={this.state.defaultIp}
+              placeholder={"192.168.0.110"}
               value={this.state.ip}
               onChange={this.handleInputChange.bind(this, "ip")}
+              error={this.state.errors.ip}
+              required
             />
           </div>
-          <Button variant="contained" color="primary" size="large">
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            onClick={this.updateSettings.bind(this)}
+          >
             Zapisz
           </Button>
         </div>
