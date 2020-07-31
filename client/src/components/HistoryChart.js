@@ -29,7 +29,7 @@ class HistoryChart extends React.Component {
                 colors: "white",
               },
               formatter: function (val) {
-                return parseFloat(val) + "°C";
+                return parseFloat(val).toFixed(2) + "°C";
               },
             },
           },

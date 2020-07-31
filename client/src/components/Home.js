@@ -61,7 +61,7 @@ class Home extends React.Component {
 
   async toogleLight(e) {
     this.setState({ isOn: e });
-    let request = await fetch(`${serverIp}/toogleLight?on=${e}`);
+    await fetch(`${serverIp}/toogleLight?on=${e}`);
 
     //Get the current time in HH:MM:SS format
     let time = new Date()
