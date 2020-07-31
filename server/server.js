@@ -73,7 +73,7 @@ app.get("/toogleLight", async (req, res) => {
   if (req.query.on == "true") {
     await toogleTheLight(true);
   } else {
-    toogleTheLight(false);
+    await toogleTheLight(false);
   }
 
   let lastChange = parseDate(new Date());
@@ -130,11 +130,11 @@ async function toogleTheLight(shouldTurnOn) {
   if (shouldTurnOn) {
     await fetch(`http://${options.ip}/cm?cmnd=Power1%20On`);
     console.log(`[${parseDate(new Date())}] Turned the light on`);
-    isOn = true;
+    isOn = "true";
   } else {
     await fetch(`http://${options.ip}/cm?cmnd=Power1%20Off`);
     console.log(`[${parseDate(new Date())}] Turned the light off`);
-    isOn = false;
+    isOn = "false";
   }
 }
 
