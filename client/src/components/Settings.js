@@ -13,8 +13,7 @@ import {
   AiOutlineSetting,
 } from "react-icons/ai";
 
-//DEV
-const serverIp = "http://localhost:5252";
+const serverIp = "";
 
 class Settings extends React.Component {
   constructor(props) {

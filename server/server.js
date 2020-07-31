@@ -20,7 +20,13 @@ let db = new sqlite.Database("./db.db", (err) => {
 });
 
 const fs = require("fs");
-const { isBuffer } = require("util");
+const path = require("path");
+const fetch = require("node-fetch");
+
+app.use(express.static(path.join(__dirname, "build")));
+
+const schedule = require("node-schedule");
+let onSchedule, offSchedule;
 
 const PORT = 5252;
 
@@ -35,6 +41,11 @@ let options = {
 let isOn = false;
 let currentTemperature = 0.0;
 let lastChangeText = "Jeszcze nie przełączono!";
+
+//The UI
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "build", "index.html"));
+});
 
 app.get("/temperature", async (req, res) => {
   currentTemperature = parseFloat(req.query.value);
@@ -68,13 +79,9 @@ app.get("/updateSettings", (req, res) => {
 
 app.get("/toogleLight", async (req, res) => {
   if (req.query.on == "true") {
-    //DEV
-    //Turn on the light
-    console.log(`[${parseDate(new Date())}] Turned the light on`);
+    await toogleTheLight(true);
   } else {
-    //DEV
-    //Turn off the light
-    console.log(`[${parseDate(new Date())}] Turned the light off`);
+    toogleTheLight(false);
   }
 
   let lastChange = parseDate(new Date());
@@ -102,6 +109,16 @@ async function fetchTheTable() {
       }
     });
   });
+}
+
+async function toogleTheLight(isOn) {
+  if (isOn) {
+    await fetch(`http://${options.ip}/control?cmd=Event,lamp_on`);
+    console.log(`[${parseDate(new Date())}] Turned the light on`);
+  } else {
+    await fetch(`http://${options.ip}/control?cmd=Event,lamp_off`);
+    console.log(`[${parseDate(new Date())}] Turned the light off`);
+  }
 }
 
 function getTheNextChange() {
@@ -140,14 +157,18 @@ function getTheNextChange() {
   }
 }
 
-function parseStringToDate(string) {
+function parseTimeString(string) {
   let colonIndex = string.indexOf(":");
   let hours = string.substring(0, colonIndex);
   let minutes = string.substring(colonIndex + 1, string.length);
+  return { hours: parseInt(hours), minutes: parseInt(minutes) };
+}
 
+function parseStringToDate(string) {
+  let { hours, minutes } = parseTimeString(string);
   let date = new Date(null);
-  date.setHours(parseInt(hours));
-  date.setMinutes(parseInt(minutes));
+  date.setHours(hours);
+  date.setMinutes(minutes);
   return date;
 }
 
@@ -218,17 +239,21 @@ async function deleteFirstRow() {
 }
 
 function getSettings() {
-  fs.readFile("./settings.json", (err, data) => {
-    if (err) {
-      console.log(
-        `[${parseDate(
-          new Date()
-        )}] Error while trying to get the settings: ${err}`
-      );
-    } else {
-      options = JSON.parse(data);
-      console.log(`[${parseDate(new Date())}] Fetched the settings`);
-    }
+  return new Promise((resolve, reject) => {
+    fs.readFile("./settings.json", (err, data) => {
+      if (err) {
+        console.log(
+          `[${parseDate(
+            new Date()
+          )}] Error while trying to get the settings: ${err}`
+        );
+        reject();
+      } else {
+        options = JSON.parse(data);
+        console.log(`[${parseDate(new Date())}] Fetched the settings`);
+        resolve();
+      }
+    });
   });
 }
 
@@ -245,6 +270,16 @@ function updateSettings(newSettings) {
       );
     } else {
       console.log(`[${parseDate(new Date())}] Updated settings successfully`);
+
+      //Reschedule the jobs
+      //Parse the on and off time
+      let parsedOnTime = parseTimeString(options.onTime);
+      let parsedOffTime = parseTimeString(options.offTime);
+
+      //Recreate the jobs (reschedule function doesn't work)
+      schedule.cancelJob(onSchedule);
+      schedule.cancelJob(offSchedule);
+      scheduleJobs(parsedOnTime, parsedOffTime);
     }
   });
 }
@@ -257,5 +292,39 @@ const server = app.listen(PORT, () => {
   console.log(`[${parseDate(new Date())}] App has started on port ${PORT}`);
 });
 
-//Fetch the settings from the file
-getSettings();
+function parseTimeToRule({ hours, minutes }) {
+  let rule = new schedule.RecurrenceRule();
+  rule.hour = hours;
+  rule.minute = minutes;
+  return rule;
+}
+
+function scheduleJobs(parsedOnTime, parsedOffTime) {
+  onSchedule = schedule.scheduleJob(parseTimeToRule(parsedOnTime), async () => {
+    console.log(`[${parseDate(new Date())}] Schedule:`);
+    await toogleTheLight(true);
+  });
+
+  offSchedule = schedule.scheduleJob(
+    parseTimeToRule(parsedOffTime),
+    async () => {
+      console.log(`[${parseDate(new Date())}] Schedule:`);
+      await toogleTheLight(false);
+    }
+  );
+}
+
+async function init() {
+  //Fetch the settings from the file
+  await getSettings();
+  //Schedule the on and off events
+
+  //Parse the on and off time
+  let parsedOnTime = parseTimeString(options.onTime);
+  let parsedOffTime = parseTimeString(options.offTime);
+
+  //Create the jobs
+  scheduleJobs(parsedOnTime, parsedOffTime);
+}
+
+init();
