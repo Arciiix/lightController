@@ -1,5 +1,4 @@
 import React from "react";
-import ApexCharts from "react-apexcharts";
 import Switch from "react-switch";
 import {
   BottomNavigation,

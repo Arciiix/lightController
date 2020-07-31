@@ -56,10 +56,10 @@
     margin: 0;
   }
   .nextChangeSpan {
-    font-size: 40px;
+    font-size: 30px;
   }
   .lastChangeSpan {
-    font-size: 25px;
+    font-size: 20px;
   }
 }
 
