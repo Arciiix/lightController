@@ -26,7 +26,7 @@ const fetch = require("node-fetch");
 app.use(express.static(path.join(__dirname, "build")));
 
 const schedule = require("node-schedule");
-let onSchedule, offSchedule;
+let onSchedule, offSchedule, temperatureInterval;
 
 const PORT = 5252;
 
@@ -36,6 +36,7 @@ let options = {
   offTime: "22:00",
   ip: "192.168.0.110",
   tableName: "temperature",
+  temperatureInterval: 15, //In minutes
 };
 
 let isOn = false;
@@ -45,15 +46,6 @@ let lastChangeText = "Jeszcze nie przełączono!";
 //The UI
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "build", "index.html"));
-});
-
-app.get("/temperature", async (req, res) => {
-  currentTemperature = parseFloat(req.query.value);
-  console.log(
-    `[${parseDate(new Date())}] Got new temperature: ${currentTemperature}`
-  );
-  res.sendStatus(200);
-  await saveTempToDb(req.query.value);
 });
 
 app.get("/getData", async (req, res) => {
@@ -94,6 +86,30 @@ app.get("/toogleLight", async (req, res) => {
   res.sendStatus(200);
 });
 
+/*
+FOR ESP EASY
+app.get("/temperature", async (req, res) => {
+  currentTemperature = parseFloat(req.query.value);
+  console.log(
+    `[${parseDate(new Date())}] Got new temperature: ${currentTemperature}`
+  );
+  res.sendStatus(200);
+  await saveTempToDb(req.query.value);
+});
+*/
+
+//For Tasmota
+async function getTemperatute() {
+  let request = await fetch(`http://${options.ip}/cm?cmnd=Status%2010`);
+  let data = await request.json();
+
+  currentTemperature = parseFloat(data.StatusSNS.DS18B20.Temperature);
+  console.log(
+    `[${parseDate(new Date())}] Got new temperature: ${currentTemperature}`
+  );
+  await saveTempToDb(currentTemperature);
+}
+
 async function fetchTheTable() {
   return new Promise((resolve, reject) => {
     let query = `SELECT * FROM ${options.tableName}`;
@@ -113,10 +129,10 @@ async function fetchTheTable() {
 
 async function toogleTheLight(isOn) {
   if (isOn) {
-    await fetch(`http://${options.ip}/control?cmd=Event,lamp_on`);
+    await fetch(`http://${options.ip}/cm?cmnd=Power1%20On`);
     console.log(`[${parseDate(new Date())}] Turned the light on`);
   } else {
-    await fetch(`http://${options.ip}/control?cmd=Event,lamp_off`);
+    await fetch(`http://${options.ip}/cm?cmnd=Power1%20Off`);
     console.log(`[${parseDate(new Date())}] Turned the light off`);
   }
 }
@@ -325,6 +341,13 @@ async function init() {
 
   //Create the jobs
   scheduleJobs(parsedOnTime, parsedOffTime);
+
+  //Create an interval for fetching the temperature and fetch it
+  temperatureInterval = setInterval(async () => {
+    await getTemperatute();
+  }, options.temperatureInterval * 60000);
+
+  await getTemperatute();
 }
 
 init();
