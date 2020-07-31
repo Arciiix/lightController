@@ -34,7 +34,6 @@ let options = {
 
 let isOn = false;
 let currentTemperature = 0.0;
-let nextChangeText = "";
 let lastChangeText = "Jeszcze nie przełączono!";
 
 app.get("/temperature", async (req, res) => {
@@ -48,7 +47,7 @@ app.get("/temperature", async (req, res) => {
 
 app.get("/getData", async (req, res) => {
   let historyTemperatures = await fetchTheTable();
-
+  let nextChangeText = getTheNextChange();
   res.send(
     JSON.stringify({
       isOn: isOn,
@@ -103,6 +102,53 @@ async function fetchTheTable() {
       }
     });
   });
+}
+
+function getTheNextChange() {
+  let onTimeDate = parseStringToDate(options.onTime);
+  let offTimeDate = parseStringToDate(options.offTime);
+
+  let currentTimeDate = new Date(null);
+  let now = new Date();
+  currentTimeDate.setHours(now.getHours());
+  currentTimeDate.setMinutes(now.getMinutes());
+
+  if (currentTimeDate < onTimeDate) {
+    let parsedOnTimeDate = parseDate(onTimeDate);
+    //Remove seconds from this string
+    parsedOnTimeDate = parsedOnTimeDate.substring(
+      0,
+      parsedOnTimeDate.length - 3
+    );
+    return `Włączenie o ${parsedOnTimeDate}`;
+  } else if (offTimeDate > currentTimeDate && onTimeDate <= currentTimeDate) {
+    let parsedOffTimeDate = parseDate(offTimeDate);
+    //Remove seconds from this string
+    parsedOffTimeDate = parsedOffTimeDate.substring(
+      0,
+      parsedOffTimeDate.length - 3
+    );
+    return `Wyłączenie o ${parsedOffTimeDate}`;
+  } else if (offTimeDate <= currentTimeDate) {
+    let parsedOnTimeDate = parseDate(onTimeDate);
+    //Remove seconds from this string
+    parsedOnTimeDate = parsedOnTimeDate.substring(
+      0,
+      parsedOnTimeDate.length - 3
+    );
+    return `Włączenie o ${parsedOnTimeDate}`;
+  }
+}
+
+function parseStringToDate(string) {
+  let colonIndex = string.indexOf(":");
+  let hours = string.substring(0, colonIndex);
+  let minutes = string.substring(colonIndex + 1, string.length);
+
+  let date = new Date(null);
+  date.setHours(parseInt(hours));
+  date.setMinutes(parseInt(minutes));
+  return date;
 }
 
 async function saveTempToDb(value) {
