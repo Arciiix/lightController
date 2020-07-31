@@ -82,7 +82,6 @@ app.get("/toogleLight", async (req, res) => {
 
   lastChangeText = `Ostatnie przełączenie: ${lastChange}`;
 
-  isOn = req.query.on;
   res.sendStatus(200);
 });
 
@@ -127,13 +126,15 @@ async function fetchTheTable() {
   });
 }
 
-async function toogleTheLight(isOn) {
-  if (isOn) {
+async function toogleTheLight(shouldTurnOn) {
+  if (shouldTurnOn) {
     await fetch(`http://${options.ip}/cm?cmnd=Power1%20On`);
     console.log(`[${parseDate(new Date())}] Turned the light on`);
+    isOn = true;
   } else {
     await fetch(`http://${options.ip}/cm?cmnd=Power1%20Off`);
     console.log(`[${parseDate(new Date())}] Turned the light off`);
+    isOn = false;
   }
 }
 
