@@ -76,12 +76,6 @@ app.get("/toogleLight", async (req, res) => {
     await toogleTheLight(false);
   }
 
-  let lastChange = parseDate(new Date());
-  //Remove seconds from the lastChange string
-  lastChange = lastChange.substring(0, lastChange.length - 3);
-
-  lastChangeText = `Ostatnie przełączenie: ${lastChange}`;
-
   res.sendStatus(200);
 });
 
@@ -129,13 +123,26 @@ async function fetchTheTable() {
 async function toogleTheLight(shouldTurnOn) {
   if (shouldTurnOn) {
     await fetch(`http://${options.ip}/cm?cmnd=Power1%20On`);
-    console.log(`[${parseDate(new Date())}] Turned the light on`);
+    //Because the light sometimes doesn't go on after the first request, turn it off and on again after some time
+    setTimeout(async () => {
+      await fetch(`http://${options.ip}/cm?cmnd=Power1%20Off`);
+      setTimeout(async () => {
+        await fetch(`http://${options.ip}/cm?cmnd=Power1%20On`);
+        console.log(`[${parseDate(new Date())}] Turned the light on`);
+      }, 3000);
+    }, 3000);
     isOn = "true";
   } else {
     await fetch(`http://${options.ip}/cm?cmnd=Power1%20Off`);
     console.log(`[${parseDate(new Date())}] Turned the light off`);
     isOn = "false";
   }
+
+  //Update the lastChange
+  let lastChange = parseDate(new Date());
+  //Remove seconds from the lastChange string
+  lastChange = lastChange.substring(0, lastChange.length - 3);
+  lastChangeText = `Ostatnie przełączenie: ${lastChange}`;
 }
 
 function getTheNextChange() {
