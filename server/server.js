@@ -304,6 +304,12 @@ function updateSettings(newSettings) {
       schedule.cancelJob(onSchedule);
       schedule.cancelJob(offSchedule);
       scheduleJobs(parsedOnTime, parsedOffTime);
+
+      //Recreate the interval
+      clearInterval(temperatureInterval);
+      temperatureInterval = setInterval(async () => {
+        await getTemperatute();
+      }, options.temperatureInterval * 60000);
     }
   });
 }

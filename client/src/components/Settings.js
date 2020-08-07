@@ -22,6 +22,7 @@ class Settings extends React.Component {
       onTime: "",
       offTime: "",
       ip: "",
+      temperatureInterval: "",
       errors: {
         onTime: false,
         offTime: false,
@@ -42,13 +43,12 @@ class Settings extends React.Component {
   async updateSettings() {
     if (!this.validate(this.state)) return;
     let request = await fetch(
-      `${serverIp}/updateSettings?onTime=${this.state.onTime}&offTime=${this.state.offTime}&ip=${this.state.ip}`
+      `${serverIp}/updateSettings?onTime=${this.state.onTime}&offTime=${this.state.offTime}&ip=${this.state.ip}&temperatureInterval=${this.state.temperatureInterval}`
     );
-    console.log(request.status);
-    this.setState({ onTime: "", offTime: "", ip: "" });
+    this.setState({ onTime: "", offTime: "", ip: "", temperatureInterval: "" });
   }
 
-  validate({ onTime, offTime, ip }) {
+  validate({ onTime, offTime, ip, temperatureInterval }) {
     //Destructure the state and get the values of onTime, offTime and ip input
     let errors = this.state.errors;
 
@@ -60,6 +60,12 @@ class Settings extends React.Component {
     errors = this.matchTheRegExp(onTime, regExpTime, "onTime", errors);
     errors = this.matchTheRegExp(offTime, regExpTime, "offTime", errors);
     errors = this.matchTheRegExp(ip, regExpIp, "ip", errors);
+    errors.temperatureInterval =
+      !isNaN(temperatureInterval) &&
+      parseInt(temperatureInterval) == temperatureInterval &&
+      temperatureInterval != 0
+        ? false
+        : true;
 
     //Update the error object globally, and if there's an error, return false, otherwise - return true
     this.setState({ errors: errors });
@@ -112,6 +118,20 @@ class Settings extends React.Component {
               value={this.state.ip}
               onChange={this.handleInputChange.bind(this, "ip")}
               error={this.state.errors.ip}
+              required
+            />
+          </div>
+          <div className="fieldDiv">
+            <TextField
+              label="Interwał zapisywania"
+              className={"field"}
+              placeholder={"15"}
+              value={this.state.temperatureInterval}
+              onChange={this.handleInputChange.bind(
+                this,
+                "temperatureInterval"
+              )}
+              error={this.state.errors.temperatureInterval}
               required
             />
           </div>

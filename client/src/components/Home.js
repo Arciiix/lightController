@@ -17,7 +17,6 @@ import CurrentChart from "./CurrentChart";
 import HistoryChart from "./HistoryChart";
 import Settings from "./Settings";
 
-//DEV
 const serverIp = "";
 
 class Home extends React.Component {
