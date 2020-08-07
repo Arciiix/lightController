@@ -26,6 +26,7 @@ class Home extends React.Component {
     this.state = {
       isLoaded: false,
       isOn: false,
+      disabled: false,
       currentTemperature: 0,
       historyTemperatures: [],
       currentPage: "Home",
@@ -60,8 +61,15 @@ class Home extends React.Component {
   }
 
   async toogleLight(e) {
-    this.setState({ isOn: e });
+    this.setState({ isOn: e, disabled: e });
     await fetch(`${serverIp}/toogleLight?on=${e}`);
+
+    //If user turns on the light, wait for 6 seconds (6,5 due the delay), because sometimes light doesn't turn off by first request, so server makes 2
+    if (e) {
+      setTimeout(() => {
+        this.setState({ disabled: false });
+      }, 6500);
+    }
 
     //Get the current time in HH:MM:SS format
     let time = new Date()
@@ -83,6 +91,7 @@ class Home extends React.Component {
               <div className="switch">
                 <Switch
                   checked={this.state.isOn}
+                  disabled={this.state.disabled}
                   onChange={this.toogleLight.bind(this)}
                   offColor="#ad1d25"
                   onColor="#86d3ff"
@@ -137,6 +146,7 @@ class Home extends React.Component {
               <div className="switch">
                 <Switch
                   checked={this.state.isOn}
+                  disabled={this.state.disabled}
                   onChange={this.toogleLight.bind(this)}
                   offColor="#ad1d25"
                   onColor="#86d3ff"
