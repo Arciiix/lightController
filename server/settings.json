@@ -1,7 +1,1 @@
-{
-  "onTime": "8:00",
-  "offTime": "22:00",
-  "ip": "192.168.0.110",
-  "tableName": "temperature",
-  "temperatureInterval": 15
-}
+{"onTime":"8:00","offTime":"22:00","ip":"192.168.0.110","tableName":"temperature","temperatureInterval":"15","targetTemperature":"3","temperatureReserve":"65"}

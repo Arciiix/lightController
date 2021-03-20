@@ -77,3 +77,14 @@
     font-size: 5vh;
   }
 }
+
+@media screen and (max-width: 230px) {
+  .lastChangeSpan {
+    display: none;
+  }
+}
+@media screen and (min-width: 231px) {
+  .lastChangeSpan {
+    display: flex;
+  }
+}

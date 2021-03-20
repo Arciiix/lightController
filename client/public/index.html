@@ -44,5 +44,15 @@
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
+    <!-- Android Viewport height fix-->
+    <script type="text/javascript">
+      if (navigator.userAgent.toLowerCase().indexOf("android") > -1) {
+        document.write(
+          '<meta name="viewport" content="width=device-width,height=' +
+            window.innerHeight +
+            ', initial-scale=1.0">'
+        );
+      }
+    </script>
   </body>
 </html>

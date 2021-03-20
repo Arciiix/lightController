@@ -6,10 +6,13 @@ import {
   CircularProgress,
 } from "@material-ui/core";
 import {
-  AiOutlineHome,
-  AiOutlineBarChart,
-  AiOutlineSetting,
-} from "react-icons/ai";
+  MdHome,
+  MdInsertChart,
+  MdSettings,
+  MdLightbulbOutline,
+  MdTrendingUp,
+  MdExpandLess,
+} from "react-icons/md";
 import "../styles/Home.css";
 import "../styles/Chart.css";
 
@@ -17,7 +20,9 @@ import CurrentChart from "./CurrentChart";
 import HistoryChart from "./HistoryChart";
 import Settings from "./Settings";
 
-const serverIp = "";
+//DEV
+//const serverIp = "";
+const serverIp = "http://192.168.0.107:5252";
 
 class Home extends React.Component {
   constructor(props) {
@@ -31,10 +36,16 @@ class Home extends React.Component {
       currentPage: "Home",
       nextChangeText: "",
       lastChangeText: "Jeszcze nie przełączono!",
+      heaterLastChangeText: "Jeszcze nie przełączono!",
+      isHeatControllerEnabled: false,
+      isHeating: false,
       settings: {
         onTime: "",
         offTime: "",
         ip: "",
+        temperatureInterval: "",
+        targetTemperature: "",
+        temperatureReserve: "",
       },
     };
   }
@@ -80,6 +91,23 @@ class Home extends React.Component {
     this.setState({ lastChangeText: `Ostatnie przełączenie: ${time}` });
   }
 
+  async toogleHeatingControl(e) {
+    //DEV
+    //Toogle the heatnig control
+    let isEnabledNowTEMP = !this.state.isHeatControllerEnabled; //DEV GET IT FROM RESPONSE!!!
+
+    //Get the current time in HH:MM:SS format
+    let time = new Date()
+      .toTimeString()
+      .replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");
+    //Remove seconds from the value
+    time = time.substring(0, time.length - 3);
+    this.setState({
+      isHeatControllerEnabled: isEnabledNowTEMP,
+      heaterLastChangeText: `Ostatnie przełączenie: ${time}`,
+    });
+  }
+
   render() {
     if (this.state.isLoaded) {
       switch (this.state.currentPage) {
@@ -88,21 +116,47 @@ class Home extends React.Component {
             <div className="container">
               <CurrentChart temperature={this.state.currentTemperature} />
               <div className="switch">
-                <Switch
-                  checked={this.state.isOn}
-                  disabled={this.state.disabled}
-                  onChange={this.toogleLight.bind(this)}
-                  offColor="#ad1d25"
-                  onColor="#86d3ff"
-                  onHandleColor="#2693e6"
-                  handleDiameter={70}
-                  uncheckedIcon={false}
-                  checkedIcon={false}
-                  boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
-                  activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
-                  height={50}
-                  width={100}
-                />
+                <div className="switchChild">
+                  <MdLightbulbOutline size={80} color={"#ffffff"} />
+                  <Switch
+                    checked={this.state.isOn}
+                    disabled={this.state.disabled}
+                    onChange={this.toogleLight.bind(this)}
+                    offColor="#ad1d25"
+                    onColor="#86d3ff"
+                    onHandleColor="#2693e6"
+                    handleDiameter={70}
+                    uncheckedIcon={false}
+                    checkedIcon={false}
+                    boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
+                    activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
+                    height={50}
+                    width={100}
+                  />
+                </div>
+              </div>
+              <div className="switch">
+                <div className="switchChild">
+                  <MdTrendingUp size={80} color={"#ffffff"} />
+                  <Switch
+                    checked={this.state.isHeatControllerEnabled}
+                    onChange={this.toogleHeatingControl.bind(this)}
+                    offColor="#ad1d25"
+                    onColor="#86d3ff"
+                    onHandleColor="#2693e6"
+                    handleDiameter={70}
+                    uncheckedIcon={false}
+                    checkedIcon={false}
+                    boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
+                    activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
+                    height={50}
+                    width={100}
+                  />
+                  <MdExpandLess
+                    size={80}
+                    color={this.state.isHeating ? "#1466c9" : "#9aa2ab"}
+                  />
+                </div>
               </div>
               <div className="navbar">
                 <BottomNavigation
@@ -114,19 +168,19 @@ class Home extends React.Component {
                     style={{ color: "white" }}
                     label="Główna"
                     value="Home"
-                    icon={<AiOutlineHome size={40} color={"white"} />}
+                    icon={<MdHome size={40} color={"white"} />}
                   />
                   <BottomNavigationAction
                     style={{ color: "white" }}
                     label="Wykres"
                     value="Chart"
-                    icon={<AiOutlineBarChart size={40} color={"white"} />}
+                    icon={<MdInsertChart size={40} color={"white"} />}
                   />
                   <BottomNavigationAction
                     style={{ color: "white" }}
                     label="Ustawienia"
                     value="Settings"
-                    icon={<AiOutlineSetting size={40} color={"white"} />}
+                    icon={<MdSettings size={40} color={"white"} />}
                   />
                 </BottomNavigation>
               </div>
@@ -135,7 +189,7 @@ class Home extends React.Component {
           break;
         case "Chart":
           return (
-            <div className="container">
+            <div className="chartContainer">
               <HistoryChart data={this.state.historyTemperatures} />
               <div className="nextChange">
                 <span className="nextChangeSpan">
@@ -143,23 +197,48 @@ class Home extends React.Component {
                 </span>
               </div>
               <div className="switch">
-                <Switch
-                  checked={this.state.isOn}
-                  disabled={this.state.disabled}
-                  onChange={this.toogleLight.bind(this)}
-                  offColor="#ad1d25"
-                  onColor="#86d3ff"
-                  onHandleColor="#2693e6"
-                  handleDiameter={70}
-                  uncheckedIcon={false}
-                  checkedIcon={false}
-                  boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
-                  activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
-                  height={50}
-                  width={100}
-                />
+                <div>
+                  <MdLightbulbOutline size={80} color={"#ffffff"} />
+                  <Switch
+                    checked={this.state.isOn}
+                    disabled={this.state.disabled}
+                    onChange={this.toogleLight.bind(this)}
+                    offColor="#ad1d25"
+                    onColor="#86d3ff"
+                    onHandleColor="#2693e6"
+                    handleDiameter={70}
+                    uncheckedIcon={false}
+                    checkedIcon={false}
+                    boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
+                    activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
+                    height={50}
+                    width={100}
+                  />
+                </div>
                 <span className="lastChangeSpan">
                   {this.state.lastChangeText}
+                </span>
+              </div>
+              <div className="switch">
+                <div className="switchChild">
+                  <MdTrendingUp size={80} color={"#ffffff"} />
+                  <Switch
+                    checked={this.state.isHeatControllerEnabled}
+                    onChange={this.toogleHeatingControl.bind(this)}
+                    offColor="#ad1d25"
+                    onColor="#86d3ff"
+                    onHandleColor="#2693e6"
+                    handleDiameter={70}
+                    uncheckedIcon={false}
+                    checkedIcon={false}
+                    boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
+                    activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
+                    height={50}
+                    width={100}
+                  />
+                </div>
+                <span className="lastChangeSpan">
+                  {this.state.heaterLastChangeText}
                 </span>
               </div>
               <div className="navbar">
@@ -172,19 +251,19 @@ class Home extends React.Component {
                     style={{ color: "white" }}
                     label="Główna"
                     value="Home"
-                    icon={<AiOutlineHome size={40} color={"white"} />}
+                    icon={<MdHome size={40} color={"white"} />}
                   />
                   <BottomNavigationAction
                     style={{ color: "white" }}
                     label="Wykres"
                     value="Chart"
-                    icon={<AiOutlineBarChart size={40} color={"white"} />}
+                    icon={<MdInsertChart size={40} color={"white"} />}
                   />
                   <BottomNavigationAction
                     style={{ color: "white" }}
                     label="Ustawienia"
                     value="Settings"
-                    icon={<AiOutlineSetting size={40} color={"white"} />}
+                    icon={<MdSettings size={40} color={"white"} />}
                   />
                 </BottomNavigation>
               </div>

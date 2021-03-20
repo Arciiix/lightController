@@ -7,13 +7,11 @@ import {
   Button,
 } from "@material-ui/core";
 
-import {
-  AiOutlineHome,
-  AiOutlineBarChart,
-  AiOutlineSetting,
-} from "react-icons/ai";
+import { MdHome, MdInsertChart, MdSettings } from "react-icons/md";
 
-const serverIp = "";
+//DEV
+//const serverIp = "";
+const serverIp = "http://192.168.0.107:5252";
 
 class Settings extends React.Component {
   constructor(props) {
@@ -23,10 +21,15 @@ class Settings extends React.Component {
       offTime: "",
       ip: "",
       temperatureInterval: "",
+      targetTemperature: "",
+      temperatureReserve: "",
       errors: {
         onTime: false,
         offTime: false,
         ip: false,
+        temperatureInterval: false,
+        targetTemperature: false,
+        temperatureReserve: false,
       },
     };
   }
@@ -43,13 +46,27 @@ class Settings extends React.Component {
   async updateSettings() {
     if (!this.validate(this.state)) return;
     let request = await fetch(
-      `${serverIp}/updateSettings?onTime=${this.state.onTime}&offTime=${this.state.offTime}&ip=${this.state.ip}&temperatureInterval=${this.state.temperatureInterval}`
+      `${serverIp}/updateSettings?onTime=${this.state.onTime}&offTime=${this.state.offTime}&ip=${this.state.ip}&temperatureInterval=${this.state.temperatureInterval}&targetTemperature=${this.state.targetTemperature}&temperatureReserve=${this.state.temperatureReserve}`
     );
-    this.setState({ onTime: "", offTime: "", ip: "", temperatureInterval: "" });
+    this.setState({
+      onTime: "",
+      offTime: "",
+      ip: "",
+      temperatureInterval: "",
+      targetTemperature: "",
+      temperatureReserve: "",
+    });
   }
 
-  validate({ onTime, offTime, ip, temperatureInterval }) {
-    //Destructure the state and get the values of onTime, offTime and ip input
+  validate({
+    onTime,
+    offTime,
+    ip,
+    temperatureInterval,
+    targetTemperature,
+    temperatureReserve,
+  }) {
+    //Get the state and get the values of all of the inputs
     let errors = this.state.errors;
 
     //Regular expression for validation
@@ -66,6 +83,14 @@ class Settings extends React.Component {
       temperatureInterval != 0
         ? false
         : true;
+
+    errors.targetTemperature = !(
+      !isNaN(targetTemperature) && targetTemperature > 0
+    );
+
+    errors.temperatureReserve = !(
+      !isNaN(temperatureReserve) && temperatureReserve > 0
+    );
 
     //Update the error object globally, and if there's an error, return false, otherwise - return true
     this.setState({ errors: errors });
@@ -123,7 +148,7 @@ class Settings extends React.Component {
           </div>
           <div className="fieldDiv">
             <TextField
-              label="Interwał zapisywania"
+              label="Interwał odczytów"
               className={"field"}
               placeholder={"15"}
               value={this.state.temperatureInterval}
@@ -132,6 +157,28 @@ class Settings extends React.Component {
                 "temperatureInterval"
               )}
               error={this.state.errors.temperatureInterval}
+              required
+            />
+          </div>
+          <div className="fieldDiv">
+            <TextField
+              label="Target temp. [°C]"
+              className={"field"}
+              placeholder={"21"}
+              value={this.state.targetTemperature}
+              onChange={this.handleInputChange.bind(this, "targetTemperature")}
+              error={this.state.errors.targetTemperature}
+              required
+            />
+          </div>
+          <div className="fieldDiv">
+            <TextField
+              label="Zapas temp. [°C] (1-5)"
+              className={"field"}
+              placeholder={"2"}
+              value={this.state.temperatureReserve}
+              onChange={this.handleInputChange.bind(this, "temperatureReserve")}
+              error={this.state.errors.temperatureReserve}
               required
             />
           </div>
@@ -154,19 +201,19 @@ class Settings extends React.Component {
               style={{ color: "white" }}
               label="Główna"
               value="Home"
-              icon={<AiOutlineHome size={40} color={"white"} />}
+              icon={<MdHome size={40} color={"white"} />}
             />
             <BottomNavigationAction
               style={{ color: "white" }}
               label="Wykres"
               value="Chart"
-              icon={<AiOutlineBarChart size={40} color={"white"} />}
+              icon={<MdInsertChart size={40} color={"white"} />}
             />
             <BottomNavigationAction
               style={{ color: "white" }}
               label="Ustawienia"
               value="Settings"
-              icon={<AiOutlineSetting size={40} color={"white"} />}
+              icon={<MdSettings size={40} color={"white"} />}
             />
           </BottomNavigation>
         </div>
