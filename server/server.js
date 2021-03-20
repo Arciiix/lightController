@@ -36,10 +36,13 @@ let options = {
   offTime: "22:00",
   ip: "192.168.0.110",
   tableName: "temperature",
-  temperatureInterval: 15, //In minutes
+  temperatureInterval: 15, //In minutes,
+  targetTemperature: 22,
+  temperatureReserve: 1,
 };
 
 let isOn = false;
+let isHeaterOn = false;
 let currentTemperature = 0.0;
 let lastChangeText = "Jeszcze nie przełączono!";
 
@@ -92,7 +95,7 @@ app.get("/temperature", async (req, res) => {
 */
 
 //For Tasmota
-async function getTemperatute() {
+async function getTemperature() {
   let request = await fetch(`http://${options.ip}/cm?cmnd=Status%2010`);
   let data = await request.json();
 
@@ -100,7 +103,48 @@ async function getTemperatute() {
   console.log(
     `[${parseDate(new Date())}] Got new temperature: ${currentTemperature}`
   );
-  await saveTempToDb(currentTemperature);
+
+  saveTempToDb(currentTemperature);
+
+  if (
+    currentTemperature <
+    parseFloat(options.targetTemperature) -
+      parseFloat(options.temperatureReserve)
+  ) {
+    if (!isHeaterOn) {
+      toogleTheHeater(true);
+    } else {
+      console.log(
+        `[${parseDate(
+          new Date()
+        )}] The temperature is higher than the target one but the heater is already on`
+      );
+    }
+  } else if (
+    currentTemperature >
+    parseFloat(options.targetTemperature) +
+      parseFloat(options.temperatureReserve)
+  ) {
+    if (isHeaterOn) {
+      toogleTheHeater(false);
+    }
+  }
+
+  console.log(options.targetTemperature - options.temperatureReserve);
+}
+
+async function toogleTheHeater(isOn) {
+  console.log(isOn);
+  if (isOn) {
+    //DEV
+    //Turn on the heater and add the log to the database
+
+    console.log(`[${parseDate(new Date())}] The heater has been turned on`);
+  } else {
+    //DEV
+    //Turn on the heater off and add the log to the database
+    console.log(`[${parseDate(new Date())}] The heater has been turned off`);
+  }
 }
 
 async function fetchTheTable() {
@@ -308,7 +352,7 @@ function updateSettings(newSettings) {
       //Recreate the interval
       clearInterval(temperatureInterval);
       temperatureInterval = setInterval(async () => {
-        await getTemperatute();
+        await getTemperature();
       }, options.temperatureInterval * 60000);
     }
   });
@@ -358,10 +402,10 @@ async function init() {
 
   //Create an interval for fetching the temperature and fetch it
   temperatureInterval = setInterval(async () => {
-    await getTemperatute();
+    await getTemperature();
   }, options.temperatureInterval * 60000);
 
-  await getTemperatute();
+  await getTemperature();
 }
 
 init();
