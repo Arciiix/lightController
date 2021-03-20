@@ -12,6 +12,7 @@ import {
   MdLightbulbOutline,
   MdTrendingUp,
   MdExpandLess,
+  MdFlashOn,
 } from "react-icons/md";
 import "../styles/Home.css";
 import "../styles/Chart.css";
@@ -62,6 +63,7 @@ class Home extends React.Component {
       } else {
         dataObj.isOn = false;
       }
+      console.log(dataObj.isHeating);
       this.setState({ isLoaded: true, ...dataObj }, this.forceUpdate);
     }
   }
@@ -92,9 +94,23 @@ class Home extends React.Component {
   }
 
   async toogleHeatingControl(e) {
-    //DEV
-    //Toogle the heatnig control
-    let isEnabledNowTEMP = !this.state.isHeatControllerEnabled; //DEV GET IT FROM RESPONSE!!!
+    //Toogle the heating control
+    let request = await fetch(
+      `${serverIp}/toogleControlledHeater?on=${e === true ? "true" : "false"}`
+    );
+    this.setState({
+      isHeatControllerEnabled: e,
+    });
+    if (e === false) {
+      this.setState({ isHeating: false });
+    }
+  }
+
+  async toogleHeater(e) {
+    //Toogle the heater
+    let request = await fetch(
+      `${serverIp}/toogleHeater?on=${e === true ? "true" : "false"}`
+    );
 
     //Get the current time in HH:MM:SS format
     let time = new Date()
@@ -103,7 +119,7 @@ class Home extends React.Component {
     //Remove seconds from the value
     time = time.substring(0, time.length - 3);
     this.setState({
-      isHeatControllerEnabled: isEnabledNowTEMP,
+      isHeating: e,
       heaterLastChangeText: `Ostatnie przełączenie: ${time}`,
     });
   }
@@ -221,10 +237,10 @@ class Home extends React.Component {
               </div>
               <div className="switch">
                 <div className="switchChild">
-                  <MdTrendingUp size={80} color={"#ffffff"} />
+                  <MdFlashOn size={80} color={"#ffffff"} />
                   <Switch
-                    checked={this.state.isHeatControllerEnabled}
-                    onChange={this.toogleHeatingControl.bind(this)}
+                    checked={this.state.isHeating}
+                    onChange={this.toogleHeater.bind(this)}
                     offColor="#ad1d25"
                     onColor="#86d3ff"
                     onHandleColor="#2693e6"

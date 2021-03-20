@@ -43,8 +43,10 @@ let options = {
 
 let isOn = false;
 let isHeaterOn = false;
+let isControlledHeaterEnabled = true;
 let currentTemperature = 0.0;
-let lastChangeText = "Jeszcze nie przełączono!";
+let lightLastChangeText = "Jeszcze nie przełączono!";
+let heaterLastChangeText = "Jeszcze nie przełączono!";
 
 //The UI
 app.get("/", (req, res) => {
@@ -60,8 +62,11 @@ app.get("/getData", async (req, res) => {
       currentTemperature: currentTemperature,
       historyTemperatures: historyTemperatures,
       nextChangeText: nextChangeText,
-      lastChangeText: lastChangeText,
+      lastChangeText: lightLastChangeText,
       settings: options,
+      heaterLastChangeText: heaterLastChangeText,
+      isHeating: isHeaterOn,
+      isHeatControllerEnabled: isControlledHeaterEnabled,
     })
   );
 
@@ -77,6 +82,29 @@ app.get("/toogleLight", async (req, res) => {
     await toogleTheLight(true);
   } else {
     await toogleTheLight(false);
+  }
+
+  res.sendStatus(200);
+});
+
+app.get("/toogleHeater", async (req, res) => {
+  if (req.query.on == "true") {
+    await toogleTheHeater(true);
+  } else {
+    await toogleTheHeater(false);
+  }
+
+  res.sendStatus(200);
+});
+
+app.get("/toogleControlledHeater", (req, res) => {
+  if (req.query.on == "true") {
+    isControlledHeaterEnabled = true;
+    console.log(`[${parseDate(new Date())}] Turned on the controlled heater`);
+  } else {
+    isControlledHeaterEnabled = false;
+    toogleTheHeater(false);
+    console.log(`[${parseDate(new Date())}] Turned off the controlled heater`);
   }
 
   res.sendStatus(200);
@@ -106,31 +134,31 @@ async function getTemperature() {
 
   saveTempToDb(currentTemperature);
 
-  if (
-    currentTemperature <
-    parseFloat(options.targetTemperature) -
-      parseFloat(options.temperatureReserve)
-  ) {
-    if (!isHeaterOn) {
-      toogleTheHeater(true);
-    } else {
-      console.log(
-        `[${parseDate(
-          new Date()
-        )}] The temperature is higher than the target one but the heater is already on`
-      );
-    }
-  } else if (
-    currentTemperature >
-    parseFloat(options.targetTemperature) +
-      parseFloat(options.temperatureReserve)
-  ) {
-    if (isHeaterOn) {
-      toogleTheHeater(false);
+  if (isControlledHeaterEnabled) {
+    if (
+      currentTemperature <
+      parseFloat(options.targetTemperature) -
+        parseFloat(options.temperatureReserve)
+    ) {
+      if (!isHeaterOn) {
+        toogleTheHeater(true);
+      } else {
+        console.log(
+          `[${parseDate(
+            new Date()
+          )}] The temperature is higher than the target one but the heater is already on`
+        );
+      }
+    } else if (
+      currentTemperature >
+      parseFloat(options.targetTemperature) +
+        parseFloat(options.temperatureReserve)
+    ) {
+      if (isHeaterOn) {
+        toogleTheHeater(false);
+      }
     }
   }
-
-  console.log(options.targetTemperature - options.temperatureReserve);
 }
 
 async function toogleTheHeater(isOn) {
@@ -140,12 +168,21 @@ async function toogleTheHeater(isOn) {
     //Turn on the heater and add the log to the database
 
     console.log(`[${parseDate(new Date())}] The heater has been turned on`);
+    isHeaterOn = true;
   } else {
     //DEV
     //Turn on the heater off and add the log to the database
     console.log(`[${parseDate(new Date())}] The heater has been turned off`);
+    isHeaterOn = false;
   }
+  //Update the lastChange
+  let lastChange = parseDate(new Date());
+  //Remove seconds from the lastChange string
+  lastChange = lastChange.substring(0, lastChange.length - 3);
+  heaterLastChangeText = `Ostatnie przełączenie: ${lastChange}`;
 }
+
+toogleTheHeater(true);
 
 async function fetchTheTable() {
   return new Promise((resolve, reject) => {
@@ -186,7 +223,7 @@ async function toogleTheLight(shouldTurnOn) {
   let lastChange = parseDate(new Date());
   //Remove seconds from the lastChange string
   lastChange = lastChange.substring(0, lastChange.length - 3);
-  lastChangeText = `Ostatnie przełączenie: ${lastChange}`;
+  lightLastChangeText = `Ostatnie przełączenie: ${lastChange}`;
 }
 
 function getTheNextChange() {
