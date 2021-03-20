@@ -165,13 +165,13 @@ async function toogleTheHeater(isOn) {
   console.log(isOn);
   if (isOn) {
     //DEV
-    //Turn on the heater and add the log to the database
+    //Turn the heater on and add a log to the database
 
     console.log(`[${parseDate(new Date())}] The heater has been turned on`);
     isHeaterOn = true;
   } else {
     //DEV
-    //Turn on the heater off and add the log to the database
+    //Turn the heater off and add a log to the database
     console.log(`[${parseDate(new Date())}] The heater has been turned off`);
     isHeaterOn = false;
   }
