@@ -40,6 +40,7 @@ class Home extends React.Component {
       heaterLastChangeText: "Jeszcze nie przełączono!",
       isHeatControllerEnabled: false,
       isHeating: false,
+      heaterLogs: [],
       settings: {
         onTime: "",
         offTime: "",
@@ -206,7 +207,10 @@ class Home extends React.Component {
         case "Chart":
           return (
             <div className="chartContainer">
-              <HistoryChart data={this.state.historyTemperatures} />
+              <HistoryChart
+                data={this.state.historyTemperatures}
+                heaterLogs={this.state.heaterLogs}
+              />
               <div className="nextChange">
                 <span className="nextChangeSpan">
                   {this.state.nextChangeText}

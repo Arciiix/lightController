@@ -57,6 +57,7 @@ app.get("/", (req, res) => {
 app.get("/getData", async (req, res) => {
   let historyTemperatures = await fetchTheTable();
   let nextChangeText = getTheNextChange();
+  let heaterLogs = await getTheHeaterLogs();
   res.send(
     JSON.stringify({
       isOn: isOn,
@@ -68,6 +69,7 @@ app.get("/getData", async (req, res) => {
       heaterLastChangeText: heaterLastChangeText,
       isHeating: isHeaterOn,
       isHeatControllerEnabled: isControlledHeaterEnabled,
+      heaterLogs: heaterLogs,
     })
   );
 
@@ -89,6 +91,7 @@ app.get("/toogleLight", async (req, res) => {
 });
 
 app.get("/toogleHeater", async (req, res) => {
+  res.sendStatus(200);
   if (req.query.on == "true") {
     await toogleTheHeater(true);
     await saveTheHeaterLogs(true);
@@ -96,8 +99,6 @@ app.get("/toogleHeater", async (req, res) => {
     await toogleTheHeater(false);
     await saveTheHeaterLogs(false);
   }
-
-  res.sendStatus(200);
 });
 
 app.get("/toogleControlledHeater", (req, res) => {
@@ -259,6 +260,23 @@ async function fetchTheTable() {
   });
 }
 
+async function getTheHeaterLogs() {
+  return new Promise((resolve, reject) => {
+    let query = `SELECT * FROM ${options.heaterTableName}`;
+    db.all(query, [], (err, rows) => {
+      if (err) {
+        console.log(
+          `[${parseDate(
+            new Date()
+          )}] Error while trying to fetch the heater logs: ${err}`
+        );
+      } else {
+        resolve(rows);
+      }
+    });
+  });
+}
+
 async function toogleTheLight(shouldTurnOn) {
   if (shouldTurnOn) {
     await fetch(`http://${options.ip}/cm?cmnd=Power1%20On`);
@@ -337,10 +355,8 @@ function parseStringToDate(string) {
 
 async function saveTempToDb(value) {
   return new Promise(async (resolve, reject) => {
-    //Get the current time in HH:MM:SS format
-    let currTime = parseDate(new Date());
-    //Remove seconds from the time
-    currTime = currTime.substring(0, currTime.length - 3);
+    //Get the current time
+    let currTime = new Date().getTime();
     //Save the value to the database
     let query = `INSERT INTO ${options.tableName} (id, time, value) VALUES (?, ?, ?)`;
     //Add the row to the database
