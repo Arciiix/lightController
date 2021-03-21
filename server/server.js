@@ -39,6 +39,7 @@ let options = {
   temperatureInterval: 15, //In minutes,
   targetTemperature: 22,
   temperatureReserve: 1,
+  heaterTableName: "heaterLogs",
 };
 
 let isOn = false;
@@ -90,8 +91,10 @@ app.get("/toogleLight", async (req, res) => {
 app.get("/toogleHeater", async (req, res) => {
   if (req.query.on == "true") {
     await toogleTheHeater(true);
+    await saveTheHeaterLogs(true);
   } else {
     await toogleTheHeater(false);
+    await saveTheHeaterLogs(false);
   }
 
   res.sendStatus(200);
@@ -162,7 +165,6 @@ async function getTemperature() {
 }
 
 async function toogleTheHeater(isOn) {
-  console.log(isOn);
   if (isOn) {
     //DEV
     //Turn the heater on and add a log to the database
@@ -182,7 +184,63 @@ async function toogleTheHeater(isOn) {
   heaterLastChangeText = `Ostatnie przełączenie: ${lastChange}`;
 }
 
-toogleTheHeater(true);
+async function saveTheHeaterLogs(isOn) {
+  return new Promise(async (resolve, reject) => {
+    //Get the current time
+    let currTime = new Date().getTime();
+    //Calculate the expiration time
+    let expirationTime = currTime + 604800000; //604800000 miliseconds are equal to 1 week
+    //Save the log to the database
+    let query = `INSERT INTO ${options.heaterTableName} (id, date, action, expires) VALUES (?, ?, ?, ?)`;
+    //Add the row to the database
+    await new Promise((resolve, reject) => {
+      db.run(query, [null, currTime, isOn ? 1 : 0, expirationTime], (err) => {
+        if (err) {
+          console.log(
+            `[${parseDate(
+              new Date()
+            )}] Error while trying to add a heater log (${
+              isOn ? "on" : "off"
+            }) to the database: ${err}`
+          );
+          reject(err);
+        } else {
+          console.log(
+            `[${parseDate(new Date())}] Added a heater log (${
+              isOn ? "on" : "off"
+            }) to the table`
+          );
+          resolve();
+        }
+      });
+    });
+    deleteExpiredLogs();
+  });
+}
+
+async function deleteExpiredLogs() {
+  return new Promise(async (resolve, reject) => {
+    //Get the current time
+    let currTime = new Date().getTime();
+    let query = `DELETE FROM ${options.heaterTableName} WHERE expires<?`;
+    //Remove all of the expired entries
+    await new Promise((resolve, reject) => {
+      db.run(query, [currTime], (err) => {
+        if (err) {
+          console.log(
+            `[${parseDate(
+              new Date()
+            )}] Error while trying to remove expired heater logs: ${err}`
+          );
+          reject(err);
+        } else {
+          console.log(`[${parseDate(new Date())}] Removed expired heater logs`);
+          resolve();
+        }
+      });
+    });
+  });
+}
 
 async function fetchTheTable() {
   return new Promise((resolve, reject) => {
