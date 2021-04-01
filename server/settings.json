@@ -1,1 +1,1 @@
-{"onTime":"8:00","offTime":"22:00","ip":"192.168.0.110","tableName":"temperature","temperatureInterval":"15","targetTemperature":"23","temperatureReserve":"1","heaterTableName": "heaterLogs"}
+{"onTime":"8:00","offTime":"22:00","ip":"192.168.0.110","tableName":"temperature","temperatureInterval":"15","targetTemperature":"22","temperatureReserve":"1","heaterTableName":"heaterLogs"}

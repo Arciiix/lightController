@@ -94,10 +94,8 @@ app.get("/toogleHeater", async (req, res) => {
   res.sendStatus(200);
   if (req.query.on == "true") {
     await toogleTheHeater(true);
-    await saveTheHeaterLogs(true);
   } else {
     await toogleTheHeater(false);
-    await saveTheHeaterLogs(false);
   }
 });
 
@@ -167,22 +165,33 @@ async function getTemperature() {
 
 async function toogleTheHeater(isOn) {
   if (isOn) {
-    //DEV
-    //Turn the heater on and add a log to the database
+    //Turn the heater on
 
-    console.log(`[${parseDate(new Date())}] The heater has been turned on`);
+    await fetch(`http://${options.ip}/cm?cmnd=Power2%20On`);
+    //Because the relay sometimes doesn't go on after the first request, turn it off and on again after some time
+    setTimeout(async () => {
+      await fetch(`http://${options.ip}/cm?cmnd=Power2%20Off`);
+      setTimeout(async () => {
+        await fetch(`http://${options.ip}/cm?cmnd=Power2%20On`);
+        console.log(`[${parseDate(new Date())}] The heater has been turned on`);
+      }, 3000);
+    }, 3000);
     isHeaterOn = true;
   } else {
-    //DEV
-    //Turn the heater off and add a log to the database
+    //Turn the heater off
+    await fetch(`http://${options.ip}/cm?cmnd=Power2%20Off`);
     console.log(`[${parseDate(new Date())}] The heater has been turned off`);
     isHeaterOn = false;
   }
+
   //Update the lastChange
   let lastChange = parseDate(new Date());
   //Remove seconds from the lastChange string
   lastChange = lastChange.substring(0, lastChange.length - 3);
   heaterLastChangeText = `Ostatnie przełączenie: ${lastChange}`;
+
+  //Add a log to the database
+  saveTheHeaterLogs(isOn);
 }
 
 async function saveTheHeaterLogs(isOn) {

@@ -6,7 +6,6 @@ class HistoryChart extends React.Component {
   constructor(props) {
     super(props);
 
-    console.log(this.props.heaterLogs);
     let onLogs = this.props.heaterLogs.filter((e) => e.action === 1);
     let offLogs = this.props.heaterLogs.filter((e) => e.action === 0);
 
@@ -15,9 +14,7 @@ class HistoryChart extends React.Component {
     let timesArray = this.props.data.map((e) => e.time.toString());
 
     //The annotations arrays
-
     onLogs.forEach((e) => {
-      console.log(e);
       heaterLogsArr.push({
         x: this.parseDateIntoStringFormat(
           this.closest(
@@ -58,8 +55,6 @@ class HistoryChart extends React.Component {
         },
       });
     });
-
-    console.log(heaterLogsArr);
 
     this.state = {
       data: this.props.data.map((e) => e.value),
@@ -103,6 +98,9 @@ class HistoryChart extends React.Component {
             labels: {
               formatter: (value) => {
                 return this.parseDateIntoStringFormat(value);
+              },
+              style: {
+                colors: "#111413",
               },
             },
           },

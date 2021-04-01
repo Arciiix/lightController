@@ -9,9 +9,7 @@ import {
 
 import { MdHome, MdInsertChart, MdSettings } from "react-icons/md";
 
-//DEV
-//const serverIp = "";
-const serverIp = "http://192.168.0.107:5252";
+const serverIp = "";
 
 class Settings extends React.Component {
   constructor(props) {
@@ -89,7 +87,7 @@ class Settings extends React.Component {
     );
 
     errors.temperatureReserve = !(
-      !isNaN(temperatureReserve) && temperatureReserve > 0
+      !isNaN(temperatureReserve) && temperatureReserve >= 0
     );
 
     //Update the error object globally, and if there's an error, return false, otherwise - return true

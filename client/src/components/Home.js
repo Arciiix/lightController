@@ -21,9 +21,7 @@ import CurrentChart from "./CurrentChart";
 import HistoryChart from "./HistoryChart";
 import Settings from "./Settings";
 
-//DEV
-//const serverIp = "";
-const serverIp = "http://192.168.0.107:5252";
+const serverIp = "";
 
 class Home extends React.Component {
   constructor(props) {
