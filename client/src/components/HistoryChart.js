@@ -64,16 +64,19 @@ class HistoryChart extends React.Component {
     };
   }
   parseDateIntoStringFormat(date) {
-    //Parse a date into HH:MM
-    //Get the current time in HH:MM:SS format
-    let parsedDate = new Date(parseInt(date))
-      .toTimeString()
-      .replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");
-    //Remove seconds from the time
-    parsedDate = parsedDate.substring(0, parsedDate.length - 3);
-
-    return parsedDate;
+    //Parse date into HH:mm dd.MM.yyyy
+    let parsedDate = new Date(parseInt(date));
+    return `${this.addZero(parsedDate.getHours())}:${this.addZero(
+      parsedDate.getMinutes()
+    )} ${this.addZero(parsedDate.getDate())}.${this.addZero(
+      parsedDate.getMonth() + 1
+    )}.${parsedDate.getFullYear()}`;
   }
+
+  addZero(number) {
+    return number < 10 ? `0${number}` : `${number}`;
+  }
+
   closest(array, goal) {
     return array.reduce(function (prev, curr) {
       return Math.abs(curr - goal) < Math.abs(prev - goal) ? curr : prev;
