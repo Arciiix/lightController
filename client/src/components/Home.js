@@ -152,10 +152,10 @@ class Home extends React.Component {
               </div>
               <div className="switch">
                 <div className="switchChild">
-                  <MdTrendingUp size={80} color={"#ffffff"} />
+                  <MdFlashOn size={80} color={"#ffffff"} />
                   <Switch
-                    checked={this.state.isHeatControllerEnabled}
-                    onChange={this.toogleHeatingControl.bind(this)}
+                    checked={this.state.isHeating}
+                    onChange={this.toogleHeater.bind(this)}
                     offColor="#ad1d25"
                     onColor="#86d3ff"
                     onHandleColor="#2693e6"
@@ -166,10 +166,6 @@ class Home extends React.Component {
                     activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
                     height={50}
                     width={100}
-                  />
-                  <MdExpandLess
-                    size={80}
-                    color={this.state.isHeating ? "#1466c9" : "#9aa2ab"}
                   />
                 </div>
               </div>
@@ -239,10 +235,10 @@ class Home extends React.Component {
               </div>
               <div className="switch">
                 <div className="switchChild">
-                  <MdFlashOn size={80} color={"#ffffff"} />
+                  <MdTrendingUp size={80} color={"#ffffff"} />
                   <Switch
-                    checked={this.state.isHeating}
-                    onChange={this.toogleHeater.bind(this)}
+                    checked={this.state.isHeatControllerEnabled}
+                    onChange={this.toogleHeatingControl.bind(this)}
                     offColor="#ad1d25"
                     onColor="#86d3ff"
                     onHandleColor="#2693e6"
@@ -253,6 +249,10 @@ class Home extends React.Component {
                     activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
                     height={50}
                     width={100}
+                  />
+                  <MdExpandLess
+                    size={80}
+                    color={this.state.isHeating ? "#1466c9" : "#9aa2ab"}
                   />
                 </div>
                 <span className="lastChangeSpan">
