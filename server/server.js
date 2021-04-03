@@ -148,7 +148,7 @@ async function getTemperature() {
         console.log(
           `[${parseDate(
             new Date()
-          )}] The temperature is higher than the target one but the heater is already on`
+          )}] The temperature is lower than the target one but the heater is already on`
         );
       }
     } else if (
