@@ -204,6 +204,7 @@ class Home extends React.Component {
               <HistoryChart
                 data={this.state.historyTemperatures}
                 heaterLogs={this.state.heaterLogs}
+                settings={this.state.settings}
               />
               <div className="nextChange">
                 <span className="nextChangeSpan">

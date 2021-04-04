@@ -119,6 +119,13 @@ class HistoryChart extends React.Component {
           },
           annotations: {
             xaxis: this.state.heaterLogsChartAnnotationsArr,
+            yaxis: [
+              {
+                y: parseFloat(this.props.settings.targetTemperature),
+                borderColor: "#006b39",
+                strokeDashArray: 0,
+              },
+            ],
           },
         }}
         series={[
