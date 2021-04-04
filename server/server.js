@@ -199,7 +199,8 @@ async function saveTheHeaterLogs(isOn) {
     //Get the current time
     let currTime = new Date().getTime();
     //Calculate the expiration time
-    let expirationTime = currTime + 604800000; //604800000 miliseconds are equal to 1 week
+    let expirationTime =
+      currTime + 280 * options.temperatureInterval * 1000 * 60; //It's equal to the current date + 280 rows * x minutes interval (x is options.temperatureInterval)
     //Save the log to the database
     let query = `INSERT INTO ${options.heaterTableName} (id, date, action, expires) VALUES (?, ?, ?, ?)`;
     //Add the row to the database
